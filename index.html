@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
+  <title>Моё PWA</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, system-ui, Arial; background: #0b0b0b; color: #fff; }
+    .wrap { padding: 20px; max-width: 520px; margin: 0 auto; }
+    .card { background: #151515; border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    button {
+      border: 0; border-radius: 14px; padding: 12px 14px; font-size: 16px;
+      background: #2d6cff; color: #fff; font-weight: 600;
+    }
+    button.secondary { background: #2a2a2a; color: #fff; }
+    input {
+      width: 100%; box-sizing: border-box; margin-top: 12px;
+      border-radius: 14px; border: 1px solid #2a2a2a; background: #101010; color: #fff;
+      padding: 12px 14px; font-size: 16px;
+    }
+    .small { opacity: .8; font-size: 13px; margin-top: 10px; line-height: 1.35; }
+    .count { font-size: 40px; font-weight: 800; margin: 8px 0 0; }
+    .note { margin-top: 10px; white-space: pre-wrap; opacity: .95; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Моё первое приложение</h1>
+      <div>Счётчик:</div>
+      <div class="count" id="count">0</div>
+
+      <div class="row">
+        <button id="plus">Плюс 1</button>
+        <button class="secondary" id="reset">Сброс</button>
+      </div>
+
+      <input id="input" placeholder="Напиши заметку и нажми Enter…" />
+      <div class="note" id="note"></div>
+
+      <div class="small">
+        ✅ Работает офлайн после первого открытия.<br/>
+        📌 Чтобы установить на iPhone: Safari → Поделиться → На экран «Домой».
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // state
+    const elCount = document.getElementById('count');
+    const elNote  = document.getElementById('note');
+    const elInput = document.getElementById('input');
+
+    const load = () => {
+      const count = Number(localStorage.getItem('count') || 0);
+      const note  = localStorage.getItem('note') || '';
+      elCount.textContent = String(count);
+      elNote.textContent  = note ? ("Заметка:\n" + note) : '';
+    };
+
+    const setCount = (v) => {
+      localStorage.setItem('count', String(v));
+      elCount.textContent = String(v);
+    };
+
+    document.getElementById('plus').addEventListener('click', () => {
+      const current = Number(localStorage.getItem('count') || 0);
+      setCount(current + 1);
+    });
+
+    document.getElementById('reset').addEventListener('click', () => setCount(0));
+
+    elInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const v = elInput.value.trim();
+        localStorage.setItem('note', v);
+        elNote.textContent = v ? ("Заметка:\n" + v) : '';
+        elInput.value = '';
+      }
+    });
+
+    // PWA service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+
+    load();
+  </script>
+</body>
+</html>
